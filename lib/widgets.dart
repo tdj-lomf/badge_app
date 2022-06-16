@@ -164,10 +164,24 @@ class _ServiceRowState extends State<ServiceRow> {
           onPanUpdate: (details) async {
             var pos = details.localPosition;
             _setPosition(pos.dx, pos.dy);
-            final int data = pos.dy >= 125 ? 1 : 0;
+            // x, y それぞれ0~14に変換して合計1byteで送信する。
+            // 7が中心とする。
+            int dataX = pos.dx ~/ 16;
+            int dataY = pos.dy ~/ 16;
+            if (dataX > 14) {
+              dataX = 14;
+            }
+            if (dataY > 14) {
+              dataY = 14;
+            }
+            dataY = 14 - dataY; // canvasのy座標が上下逆なので反転
+            final int dataXY = (dataX << 4) | dataY;
+            print("dataX " + dataX.toString());
+            print("dataY " + dataY.toString());
+            print("dataXY " + dataXY.toString());
             try {
-              await cLed!.write([data], withoutResponse: false);
-              await cLed!.read();
+              await cEye!.write([dataXY], withoutResponse: false);
+              await cEye!.read();
             } catch (e) {
               // ignore failed communication
             }
