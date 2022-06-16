@@ -198,72 +198,76 @@ class DeviceScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(device.name),
-        actions: <Widget>[
-          StreamBuilder<BluetoothDeviceState>(
-            stream: device.state,
-            initialData: BluetoothDeviceState.connecting,
-            builder: (c, snapshot) {
-              VoidCallback? onPressed;
-              String text;
-              switch (snapshot.data) {
-                case BluetoothDeviceState.connected:
-                  onPressed = () => device.disconnect();
-                  text = 'DISCONNECT';
-                  break;
-                case BluetoothDeviceState.disconnected:
-                  onPressed = () => device.connect();
-                  text = 'CONNECT';
-                  break;
-                default:
-                  onPressed = null;
-                  text = snapshot.data.toString().substring(21).toUpperCase();
-                  break;
-              }
-              return Row(children: [
-                StreamBuilder<int>(
-                    stream: rssiStream(),
-                    builder: (c2, s2) {
-                      return Text(s2.hasData ? '${s2.data}dBm' : '',
-                          style: Theme.of(c2).textTheme.caption);
-                    }),
-                StreamBuilder<bool>(
-                  stream: device.isDiscoveringServices,
-                  initialData: false,
-                  builder: (c2, s2) => IndexedStack(
-                    index: s2.data! ? 1 : 0,
-                    children: <Widget>[
-                      IconButton(
-                        icon: const Icon(Icons.refresh),
-                        onPressed: () => device.discoverServices(),
-                      ),
-                      const IconButton(
-                        icon: SizedBox(
-                          width: 18.0,
-                          height: 18.0,
-                          child: CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation(Colors.grey),
-                          ),
+      bottomNavigationBar: BottomAppBar(
+        clipBehavior: Clip.none,
+        child: Row(
+          children: <Widget>[
+            Text(device.name),
+            const SizedBox(width: 30),
+            StreamBuilder<BluetoothDeviceState>(
+              stream: device.state,
+              initialData: BluetoothDeviceState.connecting,
+              builder: (c, snapshot) {
+                VoidCallback? onPressed;
+                String text;
+                switch (snapshot.data) {
+                  case BluetoothDeviceState.connected:
+                    onPressed = () => device.disconnect();
+                    text = 'DISCONNECT';
+                    break;
+                  case BluetoothDeviceState.disconnected:
+                    onPressed = () => device.connect();
+                    text = 'CONNECT';
+                    break;
+                  default:
+                    onPressed = null;
+                    text = snapshot.data.toString().substring(21).toUpperCase();
+                    break;
+                }
+                return Row(children: [
+                  StreamBuilder<int>(
+                      stream: rssiStream(),
+                      builder: (c2, s2) {
+                        return Text(s2.hasData ? '${s2.data}dBm' : '',
+                            style: Theme.of(c2).textTheme.caption);
+                      }),
+                  StreamBuilder<bool>(
+                    stream: device.isDiscoveringServices,
+                    initialData: false,
+                    builder: (c2, s2) => IndexedStack(
+                      index: s2.data! ? 1 : 0,
+                      children: <Widget>[
+                        IconButton(
+                          icon: const Icon(Icons.refresh),
+                          onPressed: () => device.discoverServices(),
                         ),
-                        onPressed: null,
-                      )
-                    ],
+                        const IconButton(
+                          icon: SizedBox(
+                            width: 18.0,
+                            height: 18.0,
+                            child: CircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation(Colors.grey),
+                            ),
+                          ),
+                          onPressed: null,
+                        )
+                      ],
+                    ),
                   ),
-                ),
-                TextButton(
-                    onPressed: onPressed,
-                    child: Text(
-                      text,
-                      style: Theme.of(context)
-                          .primaryTextTheme
-                          .button
-                          ?.copyWith(color: Colors.white),
-                    )),
-              ]);
-            },
-          )
-        ],
+                  TextButton(
+                      onPressed: onPressed,
+                      child: Text(
+                        text,
+                        style: Theme.of(context)
+                            .primaryTextTheme
+                            .button
+                            ?.copyWith(color: Colors.white),
+                      )),
+                ]);
+              },
+            )
+          ],
+        ),
       ),
       body: SingleChildScrollView(
         child: Column(

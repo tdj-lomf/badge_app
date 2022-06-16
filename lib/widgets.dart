@@ -131,8 +131,8 @@ class ServiceRow extends StatefulWidget {
 }
 
 class _ServiceRowState extends State<ServiceRow> {
-  double _eyeX = 125;
-  double _eyeY = 125;
+  double _eyeX = 50;
+  double _eyeY = 50;
   final _eyelidZito1 = <bool>[false];
   final _eyelidZito2 = <bool>[false];
   final _eyelidNiyake = <bool>[false];
@@ -160,39 +160,47 @@ class _ServiceRowState extends State<ServiceRow> {
         }
       }
       return Row(children: [
-        GestureDetector(
-          onPanUpdate: (details) async {
-            var pos = details.localPosition;
-            _setPosition(pos.dx, pos.dy);
-            // x, y それぞれ0~14に変換して合計1byteで送信する。
-            // 7が中心とする。
-            int dataX = pos.dx ~/ 16;
-            int dataY = pos.dy ~/ 16;
-            if (dataX > 14) {
-              dataX = 14;
-            }
-            if (dataY > 14) {
-              dataY = 14;
-            }
-            dataY = 14 - dataY; // canvasのy座標が上下逆なので反転
-            final int dataXY = (dataX << 4) | dataY;
-            print("dataX " + dataX.toString());
-            print("dataY " + dataY.toString());
-            print("dataXY " + dataXY.toString());
-            try {
-              await cEye!.write([dataXY], withoutResponse: false);
-              await cEye!.read();
-            } catch (e) {
-              // ignore failed communication
-            }
-          },
-          child: EyeCanvas(
-            painter: EyePainter(eyeX: _eyeX, eyeY: _eyeY),
-          ),
+        const SizedBox(width: 200),
+        Column(
+          children: [
+            const SizedBox(height: 60),
+            GestureDetector(
+              onPanUpdate: (details) async {
+                var pos = details.localPosition;
+                _setPosition(pos.dx, pos.dy);
+                // x, y それぞれ0~14に変換して合計1byteで送信する。
+                // 7が中心とする。
+                print(pos.dx.toString() + " " + pos.dy.toString());
+                int dataX = pos.dx * 14 ~/ 100;
+                int dataY = pos.dy * 14 ~/ 100;
+                if (dataX > 14) {
+                  dataX = 14;
+                }
+                if (dataY > 14) {
+                  dataY = 14;
+                }
+                dataY = 14 - dataY; // canvasのy座標が上下逆なので反転
+                final int dataXY = (dataX << 4) | dataY;
+                print("dataX " + dataX.toString());
+                print("dataY " + dataY.toString());
+                print("dataXY " + dataXY.toString());
+                try {
+                  await cEye!.write([dataXY], withoutResponse: false);
+                  await cEye!.read();
+                } catch (e) {
+                  // ignore failed communication
+                }
+              },
+              child: EyeCanvas(
+                painter: EyePainter(eyeX: _eyeX, eyeY: _eyeY),
+              ),
+            ),
+          ],
         ),
         const SizedBox(width: 100),
         Column(
           children: [
+            const SizedBox(height: 30),
             _buildToggleButton(cEyelid!, _eyelidZito1, "zito lv.1", 2, 0),
             Row(
               children: [
@@ -267,6 +275,8 @@ class _ServiceRowState extends State<ServiceRow> {
 }
 
 class EyeCanvas extends StatelessWidget {
+  final double _width = 100;
+  final double _height = 100;
   final CustomPainter painter;
 
   const EyeCanvas({Key? key, required this.painter}) : super(key: key);
@@ -274,8 +284,8 @@ class EyeCanvas extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 250,
-      height: 250,
+      width: _width,
+      height: _height,
       child: CustomPaint(
         painter: painter,
       ),
@@ -292,11 +302,11 @@ class EyePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()..color = Colors.black12;
-    canvas.drawRect(const Rect.fromLTWH(0, 0, 250, 250), paint);
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), paint);
     paint.color = Colors.black;
-    canvas.drawCircle(Offset(size.width / 2, size.height / 2), 10, paint);
+    canvas.drawCircle(Offset(size.width / 2, size.height / 2), 5, paint);
     paint.color = Colors.blue;
-    canvas.drawCircle(Offset(eyeX, eyeY), 30, paint);
+    canvas.drawCircle(Offset(eyeX, eyeY), 15, paint);
   }
 
   @override
