@@ -131,8 +131,8 @@ class ServiceRow extends StatefulWidget {
 }
 
 class _ServiceRowState extends State<ServiceRow> {
-  double _eyeX = 50;
-  double _eyeY = 50;
+  double _eyeX = 100;
+  double _eyeY = 100;
   final _eyelidZito1 = <bool>[false];
   final _eyelidZito2 = <bool>[false];
   final _eyelidNiyake = <bool>[false];
@@ -160,19 +160,22 @@ class _ServiceRowState extends State<ServiceRow> {
         }
       }
       return Row(children: [
-        const SizedBox(width: 150),
+        const SizedBox(width: 50),
         Column(
           children: [
             const SizedBox(height: 60),
             GestureDetector(
               onPanUpdate: (details) async {
                 var pos = details.localPosition;
-                _setPosition(pos.dx, pos.dy);
+                double fixedX = _fixPosition(pos.dx);
+                double fixedY = _fixPosition(pos.dy);
+                _setPosition(fixedX, fixedY);
+              },
+              onPanEnd: (details) async {
                 // x, y それぞれ0~14に変換して合計1byteで送信する。
                 // 7が中心とする。
-                print(pos.dx.toString() + " " + pos.dy.toString());
-                int dataX = pos.dx * 14 ~/ 100;
-                int dataY = pos.dy * 14 ~/ 100;
+                int dataX = _eyeX * 14 ~/ 200;
+                int dataY = _eyeY * 14 ~/ 200;
                 if (dataX > 14) {
                   dataX = 14;
                 }
@@ -270,6 +273,16 @@ class _ServiceRowState extends State<ServiceRow> {
     });
   }
 
+  double _fixPosition(double pos) {
+    double fixed = pos;
+    if (pos < 0.0) {
+      fixed = 0.0;
+    } else if (200.0 < pos) {
+      fixed = 200.0;
+    }
+    return fixed;
+  }
+
   ToggleButtons _buildToggleButton(BluetoothCharacteristic? c,
       List<bool> states, String name, int onCommand, int offCommand) {
     return ToggleButtons(
@@ -289,8 +302,8 @@ class _ServiceRowState extends State<ServiceRow> {
 }
 
 class EyeCanvas extends StatelessWidget {
-  final double _width = 100;
-  final double _height = 100;
+  final double _width = 200;
+  final double _height = 200;
   final CustomPainter painter;
 
   const EyeCanvas({Key? key, required this.painter}) : super(key: key);
