@@ -160,7 +160,7 @@ class _ServiceRowState extends State<ServiceRow> {
         }
       }
       return Row(children: [
-        const SizedBox(width: 200),
+        const SizedBox(width: 150),
         Column(
           children: [
             const SizedBox(height: 60),
@@ -197,7 +197,21 @@ class _ServiceRowState extends State<ServiceRow> {
             ),
           ],
         ),
-        const SizedBox(width: 100),
+        const SizedBox(width: 50),
+        TextButton(
+          child: const Text("Center"),
+          onPressed: () async {
+            _setPosition(50, 50);
+            final int dataXY = (7 << 4) | 7;
+            try {
+              await cEye!.write([dataXY], withoutResponse: false);
+              await cEye!.read();
+            } catch (e) {
+              // ignore failed communication
+            }
+          },
+        ),
+        const SizedBox(width: 50),
         Column(
           children: [
             const SizedBox(height: 30),
