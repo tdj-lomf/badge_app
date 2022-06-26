@@ -204,7 +204,7 @@ class _ServiceRowState extends State<ServiceRow> {
         TextButton(
           child: const Text("Center"),
           onPressed: () async {
-            _setPosition(50, 50);
+            _setPosition(100, 100);
             final int dataXY = (7 << 4) | 7;
             try {
               await cEye!.write([dataXY], withoutResponse: false);
