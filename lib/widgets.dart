@@ -224,7 +224,7 @@ class _ServiceRowState extends State<ServiceRow> {
             ),
             Row(
               children: [
-                _buildToggleButton(cEyelid!, _eyelidMabataki, "???", 0, 0),
+                _buildToggleButton(cEyelid!, _eyelidMabataki, "blink", 1, 1),
               ],
             ),
           ],
