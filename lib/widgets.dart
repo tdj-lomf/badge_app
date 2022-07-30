@@ -6,6 +6,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'dart:async';
+import 'package:flutter/services.dart';
+import 'package:flame_gamepad/flame_gamepad.dart';
 
 class ScanResultTile extends StatelessWidget {
   const ScanResultTile({Key? key, required this.result, this.onTap})
@@ -137,6 +140,31 @@ class _ServiceRowState extends State<ServiceRow> {
   final _eyelidZito2 = <bool>[false];
   final _eyelidNiyake = <bool>[false];
   final _eyelidMabataki = <bool>[false];
+  bool _padConnected = false;
+
+  @override
+  void initState() {
+    super.initState();
+    initPlatformState();
+  }
+
+  Future<void> initPlatformState() async {
+    bool padConnected;
+    try {
+      padConnected = await FlameGamepad.isGamepadConnected;
+    } on PlatformException {
+      padConnected = false;
+    }
+
+    // If the widget was removed from the tree while the asynchronous platform
+    // message was in flight, we want to discard the reply rather than calling
+    // setState to update our non-existent appearance.
+    if (!mounted) return;
+
+    setState(() {
+      _padConnected = padConnected;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -159,6 +187,38 @@ class _ServiceRowState extends State<ServiceRow> {
             break;
         }
       }
+      // set gamepad listener
+      FlameGamepad().setListener((evtType, key) {
+        if (evtType == "UP") {
+          if (key == "SELECT") {
+            _setPosition(100, 100);
+            _writeEyeCommand(cEye, 100, 100);
+          } else if (key == "UP") {
+            _setPosition(100, 40);
+            _writeEyeCommand(cEye, 100, 40);
+          } else if (key == "DOWN") {
+            _setPosition(100, 160);
+            _writeEyeCommand(cEye, 100, 160);
+          } else if (key == "RIGHT") {
+            _setPosition(160, 100);
+            _writeEyeCommand(cEye, 160, 100);
+          } else if (key == "LEFT") {
+            _setPosition(40, 100);
+            _writeEyeCommand(cEye, 40, 100);
+          } else if (key == "Y") {
+            _writeEyelidCommand(cEyelid, 2); // zito lv.1
+          } else if (key == "X") {
+            _writeEyelidCommand(cEyelid, 3); // zito lv.2
+          } else if (key == "B") {
+            _writeEyelidCommand(cEyelid, 4); // niyake
+          } else if (key == "A") {
+            _writeEyelidCommand(cEyelid, 1); // blink
+          } else if (key == "START") {
+            _writeEyelidCommand(cEyelid, 0); // Open
+          }
+          print("Up $key");
+        }
+      });
       return Row(children: [
         const SizedBox(width: 50),
         Column(
@@ -172,27 +232,7 @@ class _ServiceRowState extends State<ServiceRow> {
                 _setPosition(fixedX, fixedY);
               },
               onPanEnd: (details) async {
-                // x, y それぞれ0~14に変換して合計1byteで送信する。
-                // 7が中心とする。
-                int dataX = _eyeX * 14 ~/ 200;
-                int dataY = _eyeY * 14 ~/ 200;
-                if (dataX > 14) {
-                  dataX = 14;
-                }
-                if (dataY > 14) {
-                  dataY = 14;
-                }
-                dataY = 14 - dataY; // canvasのy座標が上下逆なので反転
-                final int dataXY = (dataX << 4) | dataY;
-                print("dataX " + dataX.toString());
-                print("dataY " + dataY.toString());
-                print("dataXY " + dataXY.toString());
-                try {
-                  await cEye!.write([dataXY], withoutResponse: false);
-                  await cEye!.read();
-                } catch (e) {
-                  // ignore failed communication
-                }
+                _writeEyeCommand(cEye, _eyeX, _eyeY);
               },
               child: EyeCanvas(
                 painter: EyePainter(eyeX: _eyeX, eyeY: _eyeY),
@@ -205,13 +245,7 @@ class _ServiceRowState extends State<ServiceRow> {
           child: const Text("Center"),
           onPressed: () async {
             _setPosition(100, 100);
-            final int dataXY = (7 << 4) | 7;
-            try {
-              await cEye!.write([dataXY], withoutResponse: false);
-              await cEye!.read();
-            } catch (e) {
-              // ignore failed communication
-            }
+            _writeEyeCommand(cEye, 100, 100);
           },
         ),
         const SizedBox(width: 50),
@@ -253,6 +287,30 @@ class _ServiceRowState extends State<ServiceRow> {
       subtitle:
           Text('0x${service.uuid.toString().toUpperCase().substring(4, 8)}'),
     );
+  }
+
+  void _writeEyeCommand(BluetoothCharacteristic? c, double x, double y) async {
+    // x, y それぞれ0~14に変換して合計1byteで送信する。
+    // 7が中心とする。
+    int dataX = x * 14 ~/ 200;
+    int dataY = y * 14 ~/ 200;
+    if (dataX > 14) {
+      dataX = 14;
+    }
+    if (dataY > 14) {
+      dataY = 14;
+    }
+    dataY = 14 - dataY; // canvasのy座標が上下逆なので反転
+    final int dataXY = (dataX << 4) | dataY;
+    print("dataX " + dataX.toString());
+    print("dataY " + dataY.toString());
+    print("dataXY " + dataXY.toString());
+    try {
+      await c!.write([dataXY], withoutResponse: false);
+      await c!.read();
+    } catch (e) {
+      // ignore failed communication
+    }
   }
 
   void _writeEyelidCommand(BluetoothCharacteristic? c, int id) async {
