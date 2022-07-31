@@ -237,9 +237,11 @@ class DeviceScreen extends StatelessWidget {
                     builder: (c2, s2) => IndexedStack(
                       index: s2.data! ? 1 : 0,
                       children: <Widget>[
-                        IconButton(
-                          icon: const Icon(Icons.refresh),
-                          onPressed: () => device.discoverServices(),
+                        ExcludeFocus(
+                          child: IconButton(
+                            icon: const Icon(Icons.refresh),
+                            onPressed: () => device.discoverServices(),
+                          ),
                         ),
                         const IconButton(
                           icon: SizedBox(
@@ -254,15 +256,17 @@ class DeviceScreen extends StatelessWidget {
                       ],
                     ),
                   ),
-                  TextButton(
-                      onPressed: onPressed,
-                      child: Text(
-                        text,
-                        style: Theme.of(context)
-                            .primaryTextTheme
-                            .button
-                            ?.copyWith(color: Colors.white),
-                      )),
+                  ExcludeFocus(
+                    child: TextButton(
+                        onPressed: onPressed,
+                        child: Text(
+                          text,
+                          style: Theme.of(context)
+                              .primaryTextTheme
+                              .button
+                              ?.copyWith(color: Colors.blue),
+                        )),
+                  ),
                 ]);
               },
             )

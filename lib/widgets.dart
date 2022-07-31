@@ -141,6 +141,7 @@ class _ServiceRowState extends State<ServiceRow> {
   final _eyelidNiyake = <bool>[false];
   final _eyelidMabataki = <bool>[false];
   bool _padConnected = false;
+  bool _l1Pressed = false;
 
   @override
   void initState() {
@@ -215,8 +216,18 @@ class _ServiceRowState extends State<ServiceRow> {
             _writeEyelidCommand(cEyelid, 1); // blink
           } else if (key == "START") {
             _writeEyelidCommand(cEyelid, 0); // Open
+          } else if (key == "L1") {
+            setState(() {
+              _l1Pressed = false;
+            });
           }
-          print("Up $key");
+          print("Up $key with l1 $_l1Pressed");
+        } else if (evtType == "DOWN") {
+          if (key == "L1") {
+            setState(() {
+              _l1Pressed = true;
+            });
+          }
         }
       });
       return Row(children: [
@@ -241,12 +252,14 @@ class _ServiceRowState extends State<ServiceRow> {
           ],
         ),
         const SizedBox(width: 50),
-        TextButton(
-          child: const Text("Center"),
-          onPressed: () async {
-            _setPosition(100, 100);
-            _writeEyeCommand(cEye, 100, 100);
-          },
+        ExcludeFocus(
+          child: TextButton(
+            child: const Text("Center"),
+            onPressed: () async {
+              _setPosition(100, 100);
+              _writeEyeCommand(cEye, 100, 100);
+            },
+          ),
         ),
         const SizedBox(width: 50),
         Column(
@@ -259,13 +272,17 @@ class _ServiceRowState extends State<ServiceRow> {
                 const SizedBox(width: 10),
                 Column(
                   children: [
-                    TextButton(
-                      child: const Text("Open"),
-                      onPressed: () => _writeEyelidCommand(cEyelid!, 0),
+                    ExcludeFocus(
+                      child: TextButton(
+                        child: const Text("Open"),
+                        onPressed: () => _writeEyelidCommand(cEyelid!, 0),
+                      ),
                     ),
-                    TextButton(
-                      child: const Text("Close"),
-                      onPressed: () => _writeEyelidCommand(cEyelid!, 5),
+                    ExcludeFocus(
+                      child: TextButton(
+                        child: const Text("Close"),
+                        onPressed: () => _writeEyelidCommand(cEyelid!, 5),
+                      ),
                     ),
                   ],
                 ),
@@ -341,20 +358,22 @@ class _ServiceRowState extends State<ServiceRow> {
     return fixed;
   }
 
-  ToggleButtons _buildToggleButton(BluetoothCharacteristic? c,
-      List<bool> states, String name, int onCommand, int offCommand) {
-    return ToggleButtons(
-      isSelected: states,
-      children: [
-        Text(name),
-      ],
-      onPressed: (index) {
-        setState(() {
-          states[index] = !states[index];
-        });
-        final int id = states[index] ? onCommand : offCommand;
-        _writeEyelidCommand(c, id);
-      },
+  ExcludeFocus _buildToggleButton(BluetoothCharacteristic? c, List<bool> states,
+      String name, int onCommand, int offCommand) {
+    return ExcludeFocus(
+      child: ToggleButtons(
+        isSelected: states,
+        children: [
+          Text(name),
+        ],
+        onPressed: (index) {
+          setState(() {
+            states[index] = !states[index];
+          });
+          final int id = states[index] ? onCommand : offCommand;
+          _writeEyelidCommand(c, id);
+        },
+      ),
     );
   }
 }
