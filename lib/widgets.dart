@@ -173,6 +173,7 @@ class _ServiceRowState extends State<ServiceRow> {
     if (service.characteristics.isNotEmpty) {
       BluetoothCharacteristic? cLed;
       BluetoothCharacteristic? cEye;
+      BluetoothCharacteristic? cEyeSlow;
       BluetoothCharacteristic? cEyelid;
       for (BluetoothCharacteristic c in service.characteristics) {
         String name = c.uuid.toString().toUpperCase().substring(4, 8);
@@ -183,6 +184,9 @@ class _ServiceRowState extends State<ServiceRow> {
           case "F468":
             cEye = c;
             break;
+          case "7DE6":
+            cEyeSlow = c;
+            break;
           case "D297":
             cEyelid = c;
             break;
@@ -191,21 +195,22 @@ class _ServiceRowState extends State<ServiceRow> {
       // set gamepad listener
       FlameGamepad().setListener((evtType, key) {
         if (evtType == "UP") {
+          BluetoothCharacteristic? cTargetEye = _l1Pressed ? cEyeSlow : cEye;
           if (key == "SELECT") {
             _setPosition(100, 100);
-            _writeEyeCommand(cEye, 100, 100);
+            _writeEyeCommand(cTargetEye, 100, 100);
           } else if (key == "UP") {
             _setPosition(100, 40);
-            _writeEyeCommand(cEye, 100, 40);
+            _writeEyeCommand(cTargetEye, 100, 40);
           } else if (key == "DOWN") {
             _setPosition(100, 160);
-            _writeEyeCommand(cEye, 100, 160);
+            _writeEyeCommand(cTargetEye, 100, 160);
           } else if (key == "RIGHT") {
             _setPosition(160, 100);
-            _writeEyeCommand(cEye, 160, 100);
+            _writeEyeCommand(cTargetEye, 160, 100);
           } else if (key == "LEFT") {
             _setPosition(40, 100);
-            _writeEyeCommand(cEye, 40, 100);
+            _writeEyeCommand(cTargetEye, 40, 100);
           } else if (key == "Y") {
             _writeEyelidCommand(cEyelid, 2); // zito lv.1
           } else if (key == "X") {
