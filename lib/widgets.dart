@@ -221,6 +221,10 @@ class _ServiceRowState extends State<ServiceRow> {
             _writeEyelidCommand(cEyelid, 1); // blink
           } else if (key == "START") {
             _writeEyelidCommand(cEyelid, 0); // Open
+          } else if (key == "R1") {
+            _writeEyelidCommand(cEyelid, 0); // Open
+          } else if (key == "R2") {
+            _writeEyelidCommand(cEyelid, 5); // Close
           } else if (key == "L1") {
             setState(() {
               _l1Pressed = false;
