@@ -13,6 +13,11 @@ Flutter project for AI Badge.
 1. デバイスをPCに接続する。
 2. 実行＞デバッグの開始 または Ctrl + F5 でデバッグモードのアプリがインストールされる。
 
+デバイスをPCに接続して下記を実行する。  
+```
+flutter run --no-sound-null-safety
+```
+
 ## リリースビルド
 1. デバイスをPCに接続する。
 2. `flutter build apk --split-per-abi`
@@ -23,12 +28,16 @@ apkをGitリポジトリで管理しているので、コードを編集して�
 アプリを起動してもうまく動かない場合、権限が足りない可能性がある。  
 スマホのアプリ設定画面から権限を追加する。  
 
-
 ## コード編集
 メインのコードは`(project)/lib/`に入っている。  
 - main.dart:  
     bluetoothデバイスのスキャンや接続の画面。ほぼflutter_blue_plusのサンプル画面のまま。  
 - widgets.dart: デバイス接続後のモータ操作画面。  
     _ServiceRowStateクラスのbuild関数で画面のレイアウトや操作コマンドを決めている。  
+
+## コントローラの接続 (PS4コントローラの場合)
+1. ShareボタンとPSボタンを同時に5秒間程度長押し → 白く点滅する
+2. スマホからbluetoothで接続
+
 
 ...
