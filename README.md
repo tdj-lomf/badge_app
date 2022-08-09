@@ -10,9 +10,6 @@ Flutter project for AI Badge.
 4. コマンドパレットで `Flutter: Get Packages` を実行。 
 
 ## デバッグ実行
-1. デバイスをPCに接続する。
-2. 実行＞デバッグの開始 または Ctrl + F5 でデバッグモードのアプリがインストールされる。
-
 デバイスをPCに接続して下記を実行する。  
 ```
 flutter run --no-sound-null-safety
