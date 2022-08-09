@@ -15,6 +15,11 @@ Flutter project for AI Badge.
 flutter run --no-sound-null-safety
 ```
 
+コード編集をしておらず、インストールのみの場合は下記でいけるかも。  
+```
+flutter install
+```
+
 ## リリースビルド
 1. デバイスをPCに接続する。
 2. `flutter build apk --split-per-abi`
