@@ -200,8 +200,7 @@ class _ServiceRowState extends State<ServiceRow> {
           if (current - _lastTime > 100) {
             BluetoothCharacteristic? cTargetEye = _l1Pressed ? cEyeSlow : cEye;
             if (key == "SELECT") {
-              _setPosition(100, 100);
-              _writeEyeCommand(cTargetEye, 100, 100);
+              _shareButtonFunc(cEyelid);
             } else if (key == "UP") {
               _setPosition(100, 40);
               _writeEyeCommand(cTargetEye, 100, 40);
@@ -216,26 +215,26 @@ class _ServiceRowState extends State<ServiceRow> {
               _writeEyeCommand(cTargetEye, 40, 100);
             } else if (key == "Y") {
               setState(() {
+                _eyelidNiyake[0] = !_eyelidNiyake[0];
+              });
+              final int command = _eyelidNiyake[0] ? 4 : 0;
+              _writeEyelidCommand(cEyelid, command); // niyake
+            } else if (key == "X") {
+              _writeEyelidCommand(cEyelid, 1); // blink
+            } else if (key == "B") {
+              setState(() {
                 _eyelidZito1[0] = !_eyelidZito1[0];
               });
               final int command = _eyelidZito1[0] ? 2 : 0;
               _writeEyelidCommand(cEyelid, command); // zito lv.1
-            } else if (key == "X") {
+            } else if (key == "A") {
               setState(() {
                 _eyelidZito2[0] = !_eyelidZito2[0];
               });
               final int command = _eyelidZito2[0] ? 3 : 0;
               _writeEyelidCommand(cEyelid, command); // zito lv.2
-            } else if (key == "B") {
-              setState(() {
-                _eyelidNiyake[0] = !_eyelidNiyake[0];
-              });
-              final int command = _eyelidNiyake[0] ? 4 : 0;
-              _writeEyelidCommand(cEyelid, command); // niyake
-            } else if (key == "A") {
-              _writeEyelidCommand(cEyelid, 1); // blink
             } else if (key == "START") {
-              _writeEyelidCommand(cEyelid, 0); // Open
+              _startButtonFunc(cEyelid);
             } else if (key == "R1") {
               _writeEyelidCommand(cEyelid, 0); // Open
             } else if (key == "R2") {
@@ -244,6 +243,9 @@ class _ServiceRowState extends State<ServiceRow> {
               setState(() {
                 _l1Pressed = false;
               });
+            } else if (key == "L2") {
+              _setPosition(100, 100);
+              _writeEyeCommand(cTargetEye, 100, 100);
             }
             print("Up $key with l1 $_l1Pressed");
             setState(() {
@@ -332,6 +334,14 @@ class _ServiceRowState extends State<ServiceRow> {
       subtitle:
           Text('0x${service.uuid.toString().toUpperCase().substring(4, 8)}'),
     );
+  }
+
+  void _shareButtonFunc(BluetoothCharacteristic? c) async {
+    // share button
+  }
+
+  void _startButtonFunc(BluetoothCharacteristic? c) async {
+    // start button
   }
 
   void _writeEyeCommand(BluetoothCharacteristic? c, double x, double y) async {
