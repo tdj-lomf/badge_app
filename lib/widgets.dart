@@ -142,6 +142,7 @@ class _ServiceRowState extends State<ServiceRow> {
   final _eyelidMabataki = <bool>[false];
   bool _padConnected = false;
   bool _l1Pressed = false;
+  int _lastTime = DateTime.now().millisecondsSinceEpoch;
 
   @override
   void initState() {
@@ -195,42 +196,60 @@ class _ServiceRowState extends State<ServiceRow> {
       // set gamepad listener
       FlameGamepad().setListener((evtType, key) {
         if (evtType == "UP") {
-          BluetoothCharacteristic? cTargetEye = _l1Pressed ? cEyeSlow : cEye;
-          if (key == "SELECT") {
-            _setPosition(100, 100);
-            _writeEyeCommand(cTargetEye, 100, 100);
-          } else if (key == "UP") {
-            _setPosition(100, 40);
-            _writeEyeCommand(cTargetEye, 100, 40);
-          } else if (key == "DOWN") {
-            _setPosition(100, 160);
-            _writeEyeCommand(cTargetEye, 100, 160);
-          } else if (key == "RIGHT") {
-            _setPosition(160, 100);
-            _writeEyeCommand(cTargetEye, 160, 100);
-          } else if (key == "LEFT") {
-            _setPosition(40, 100);
-            _writeEyeCommand(cTargetEye, 40, 100);
-          } else if (key == "Y") {
-            _writeEyelidCommand(cEyelid, 2); // zito lv.1
-          } else if (key == "X") {
-            _writeEyelidCommand(cEyelid, 3); // zito lv.2
-          } else if (key == "B") {
-            _writeEyelidCommand(cEyelid, 4); // niyake
-          } else if (key == "A") {
-            _writeEyelidCommand(cEyelid, 1); // blink
-          } else if (key == "START") {
-            _writeEyelidCommand(cEyelid, 0); // Open
-          } else if (key == "R1") {
-            _writeEyelidCommand(cEyelid, 0); // Open
-          } else if (key == "R2") {
-            _writeEyelidCommand(cEyelid, 5); // Close
-          } else if (key == "L1") {
+          final int current = DateTime.now().millisecondsSinceEpoch;
+          if (current - _lastTime > 100) {
+            BluetoothCharacteristic? cTargetEye = _l1Pressed ? cEyeSlow : cEye;
+            if (key == "SELECT") {
+              _setPosition(100, 100);
+              _writeEyeCommand(cTargetEye, 100, 100);
+            } else if (key == "UP") {
+              _setPosition(100, 40);
+              _writeEyeCommand(cTargetEye, 100, 40);
+            } else if (key == "DOWN") {
+              _setPosition(100, 160);
+              _writeEyeCommand(cTargetEye, 100, 160);
+            } else if (key == "RIGHT") {
+              _setPosition(160, 100);
+              _writeEyeCommand(cTargetEye, 160, 100);
+            } else if (key == "LEFT") {
+              _setPosition(40, 100);
+              _writeEyeCommand(cTargetEye, 40, 100);
+            } else if (key == "Y") {
+              setState(() {
+                _eyelidZito1[0] = !_eyelidZito1[0];
+              });
+              final int command = _eyelidZito1[0] ? 2 : 0;
+              _writeEyelidCommand(cEyelid, command); // zito lv.1
+            } else if (key == "X") {
+              setState(() {
+                _eyelidZito2[0] = !_eyelidZito2[0];
+              });
+              final int command = _eyelidZito2[0] ? 3 : 0;
+              _writeEyelidCommand(cEyelid, command); // zito lv.2
+            } else if (key == "B") {
+              setState(() {
+                _eyelidNiyake[0] = !_eyelidNiyake[0];
+              });
+              final int command = _eyelidNiyake[0] ? 4 : 0;
+              _writeEyelidCommand(cEyelid, command); // niyake
+            } else if (key == "A") {
+              _writeEyelidCommand(cEyelid, 1); // blink
+            } else if (key == "START") {
+              _writeEyelidCommand(cEyelid, 0); // Open
+            } else if (key == "R1") {
+              _writeEyelidCommand(cEyelid, 0); // Open
+            } else if (key == "R2") {
+              _writeEyelidCommand(cEyelid, 5); // Close
+            } else if (key == "L1") {
+              setState(() {
+                _l1Pressed = false;
+              });
+            }
+            print("Up $key with l1 $_l1Pressed");
             setState(() {
-              _l1Pressed = false;
+              _lastTime = current;
             });
           }
-          print("Up $key with l1 $_l1Pressed");
         } else if (evtType == "DOWN") {
           if (key == "L1") {
             setState(() {
