@@ -338,6 +338,7 @@ class _ServiceRowState extends State<ServiceRow> {
 
   void _shareButtonFunc(BluetoothCharacteristic? c) async {
     // share button
+    _writeEyelidCommand(c, 6); // Slowly Open
   }
 
   void _startButtonFunc(BluetoothCharacteristic? c) async {
