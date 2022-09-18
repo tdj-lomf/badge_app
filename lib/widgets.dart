@@ -218,27 +218,27 @@ class _ServiceRowState extends State<ServiceRow> {
                 _eyelidNiyake[0] = !_eyelidNiyake[0];
               });
               final int command = _eyelidNiyake[0] ? 4 : 0;
-              _writeEyelidCommand(cEyelid, command); // niyake
+              _writeEyelidCommand(cEyelid, command, _l1Pressed); // niyake
             } else if (key == "X") {
-              _writeEyelidCommand(cEyelid, 1); // blink
+              _writeEyelidCommand(cEyelid, 1, _l1Pressed); // blink
             } else if (key == "B") {
               setState(() {
                 _eyelidZito1[0] = !_eyelidZito1[0];
               });
               final int command = _eyelidZito1[0] ? 2 : 0;
-              _writeEyelidCommand(cEyelid, command); // zito lv.1
+              _writeEyelidCommand(cEyelid, command, _l1Pressed); // zito lv.1
             } else if (key == "A") {
               setState(() {
                 _eyelidZito2[0] = !_eyelidZito2[0];
               });
               final int command = _eyelidZito2[0] ? 3 : 0;
-              _writeEyelidCommand(cEyelid, command); // zito lv.2
+              _writeEyelidCommand(cEyelid, command, _l1Pressed); // zito lv.2
             } else if (key == "START") {
               _startButtonFunc(cEyelid);
             } else if (key == "R1") {
-              _writeEyelidCommand(cEyelid, 0); // Open
+              _writeEyelidCommand(cEyelid, 0, _l1Pressed); // Open
             } else if (key == "R2") {
-              _writeEyelidCommand(cEyelid, 5); // Close
+              _writeEyelidCommand(cEyelid, 5, _l1Pressed); // Close
             } else if (key == "L1") {
               setState(() {
                 _l1Pressed = false;
@@ -305,13 +305,15 @@ class _ServiceRowState extends State<ServiceRow> {
                     ExcludeFocus(
                       child: TextButton(
                         child: const Text("Open"),
-                        onPressed: () => _writeEyelidCommand(cEyelid!, 0),
+                        onPressed: () =>
+                            _writeEyelidCommand(cEyelid!, 0, false),
                       ),
                     ),
                     ExcludeFocus(
                       child: TextButton(
                         child: const Text("Close"),
-                        onPressed: () => _writeEyelidCommand(cEyelid!, 5),
+                        onPressed: () =>
+                            _writeEyelidCommand(cEyelid!, 5, false),
                       ),
                     ),
                   ],
@@ -338,7 +340,7 @@ class _ServiceRowState extends State<ServiceRow> {
 
   void _shareButtonFunc(BluetoothCharacteristic? c) async {
     // share button
-    _writeEyelidCommand(c, 6); // Slowly Open
+    _writeEyelidCommand(c, 0, true); // Slowly Open
   }
 
   void _startButtonFunc(BluetoothCharacteristic? c) async {
@@ -369,10 +371,15 @@ class _ServiceRowState extends State<ServiceRow> {
     }
   }
 
-  void _writeEyelidCommand(BluetoothCharacteristic? c, int id) async {
+  void _writeEyelidCommand(
+      BluetoothCharacteristic? c, int id, bool slowMode) async {
+    int fullId = id;
+    if (slowMode) {
+      fullId = id | 128; // 8bit目を1にする
+    }
     if (c != null) {
       try {
-        await c.write([id], withoutResponse: false);
+        await c.write([fullId], withoutResponse: false);
         await c.read();
       } catch (e) {
         // ignore communication error
@@ -410,7 +417,7 @@ class _ServiceRowState extends State<ServiceRow> {
             states[index] = !states[index];
           });
           final int id = states[index] ? onCommand : offCommand;
-          _writeEyelidCommand(c, id);
+          _writeEyelidCommand(c, id, false);
         },
       ),
     );
