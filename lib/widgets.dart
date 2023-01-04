@@ -140,6 +140,7 @@ class _ServiceRowState extends State<ServiceRow> {
   final _eyelidZito2 = <bool>[false];
   final _eyelidNiyake = <bool>[false];
   final _eyelidMabataki = <bool>[false];
+  final _autoMode = <bool>[false];
   bool _padConnected = false;
   bool _l1Pressed = false;
   int _lastTime = DateTime.now().millisecondsSinceEpoch;
@@ -176,6 +177,7 @@ class _ServiceRowState extends State<ServiceRow> {
       BluetoothCharacteristic? cEye;
       BluetoothCharacteristic? cEyeSlow;
       BluetoothCharacteristic? cEyelid;
+      BluetoothCharacteristic? cAuto;
       for (BluetoothCharacteristic c in service.characteristics) {
         String name = c.uuid.toString().toUpperCase().substring(4, 8);
         switch (name) {
@@ -190,6 +192,9 @@ class _ServiceRowState extends State<ServiceRow> {
             break;
           case "D297":
             cEyelid = c;
+            break;
+          case "4352":
+            cAuto = c;
             break;
         }
       }
@@ -282,14 +287,20 @@ class _ServiceRowState extends State<ServiceRow> {
           ],
         ),
         const SizedBox(width: 50),
-        ExcludeFocus(
-          child: TextButton(
-            child: const Text("Center"),
-            onPressed: () async {
-              _setPosition(100, 100);
-              _writeEyeCommand(cEye, 100, 100);
-            },
-          ),
+        Column(
+          children: [
+            ExcludeFocus(
+              child: TextButton(
+                child: const Text("Center"),
+                onPressed: () async {
+                  _setPosition(100, 100);
+                  _writeEyeCommand(cEye, 100, 100);
+                },
+              ),
+            ),
+            const SizedBox(height: 30),
+            _buildToggleButton(cAuto!, _autoMode, "Auto", 1, 0),
+          ],
         ),
         const SizedBox(width: 50),
         Column(
